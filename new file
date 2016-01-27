@@ -1,0 +1,124 @@
+include "assignment1.h"
+
+void denseMatrixMult(int ** A, int ** B, int *** resultMatrix, int n)
+{
+        int ** Z;
+        int ** smallA, ** smallB, ** result;
+        int i, j;
+
+        initMatrix(&Z, n);
+        initMatrix(&result, n);
+        int **M0, **M1, **M2, **M3, **M4, **M5, **M6;
+        int **C00, **C01, **C10, **C11;
+
+        if (n == 1)
+        {
+                result[0][0] = A[0][0]*B[0][0];
+        }
+        else
+        {
+/*M0*/
+                smallA = sum(A, A, 0, 0, n/2, n/2, n/2);
+                smallB = sum(B, B, 0, 0, n/2, n/2, n/2);
+                denseMatrixMult(smallA, smallB,&M0, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M1*/
+                smallA = sum(A, A, 0, n/2, n/2, n/2, n/2);
+                smallB = sum(B, Z, 0, 0, 0, 0, n/2);
+                denseMatrixMult(smallA, smallB, &M1, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M2*/
+                smallA = sum(A, Z, 0, 0, 0, 0, n/2);
+                smallB = sub(B, B, n/2, 0, n/2, n/2, n/2);
+                denseMatrixMult(smallA, smallB, &M2, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M3*/
+                smallA = sum(A, Z, n/2, n/2, 0, 0, n/2);
+                smallB = sub(B, B, 0, n/2, 0, 0, n/2);
+                denseMatrixMult(smallA, smallB, &M3, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M4*/
+                smallA = sum(A, A, 0, 0, n/2, 0, n/2);
+                smallB = sum(B, Z, n/2, n/2, 0, 0, n/2);
+                denseMatrixMult(smallA, smallB, &M4, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M5*/
+                smallA = sub(A, A, 0, n/2, 0, 0, n/2);
+                smallB = sum(B, B, 0, 0, n/2, 0, n/2);
+                denseMatrixMult(smallA, smallB, &M5, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*M6*/
+                smallA = sub(A, A, n/2, 0, n/2, n/2, n/2);
+                smallB = sum(B, B, 0, n/2, n/2, n/2, n/2);
+                denseMatrixMult(smallA, smallB, &M6, n/2);
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+/*prodC01*/
+                C01 = sum(M2, M4, 0, 0, 0, 0, n/2);
+/*prodC10*/
+                C10 = sum(M1, M3, 0, 0, 0, 0, n/2);
+/*prodC11*/
+                smallA = sub(M0, M1, 0, 0, 0, 0, n/2);
+                smallB = sum(M2, M5, 0, 0, 0, 0, n/2);
+                C11 = sum(smallA, smallB, 0, 0, 0, 0, n/2);
+
+                freeMatrix(n/2, smallA);
+                freeMatrix(n/2, smallB);
+
+                for (i = 0; i < n/2; i++)
+                {
+                        for (j = 0; j < n/2; j++)
+                        {
+                                result[i][j] = C00[i][j];
+                        }
+                }
+
+                for (i = n/2; i < n; i++)
+                {
+                        for (j = 0; j < n/2; j++)
+                        {
+                                result[i][j] = C01[i-(n/2)][j];
+                        }
+                }
+
+                for (i = 0; i < n/2; i++)
+                {
+                        for (j = n/2; j < n; j++)
+                        {
+                                result[i][j] = C10[i][j-(n/2)];
+                        }
+                }
+
+                for (i = n/2; i < n; i++)
+                {
+                        for (j = n/2; j < n; j++)
+{
+                                result[i][i] = C11[i-(n/2)][j-(n/2)];
+                        }
+                }
+
+                /*FREE MAT*/
+                        freeMatrix(n/2, M0);
+                        freeMatrix(n/2, M1);
+                        freeMatrix(n/2, M2);
+                        freeMatrix(n/2, M3);
+                        freeMatrix(n/2, M4);
+                        freeMatrix(n/2, M5);
+                        freeMatrix(n/2, M6);
+
+                        freeMatrix(n/2, C00);
+                        freeMatrix(n/2, C01);
+                        freeMatrix(n/2, C10);
+                        freeMatrix(n/2, C11);
+
+        }
+        freeMatrix(n, Z);
+ *resultMatrix = result;
+}
+
